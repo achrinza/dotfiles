@@ -16,9 +16,9 @@
 # </text>
 
 [Context]
-filesystems=!host;/home/user/Android/sdk:ro;/home/user/Documents/git-repos/achrinza/config;/home/user/Documents/git-repos/achrinza/notes;
+filesystems=!host;/home/user/Android/sdk:ro;/home/user/Documents/git-repos/achrinza/dotfiles/foss/dot-var/app/org.gnu.emacs/config/emacs:ro;/home/user/Documents/git-repos/achrinza/notes;
 persistent=.gradle;.android;
 
 [Environment]
 ANDROID_HOME=/home/user/.android/sdk/
-FLATPAK_ENABLE_SDK_EXT=node20,openjdk21,clojure,clojure-lsp,leiningen,android-cli-tools
+FLATPAK_ENABLE_SDK_EXT=node20,openjdk21,clojure,clojure-lsp,leiningen,android-cli-tools,babashka
