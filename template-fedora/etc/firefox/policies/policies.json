@@ -1,0 +1,34 @@
+{
+  "policies": {
+    "DisableAppUpdate": true,
+    "DisableBuiltinPDFViewer": true,
+    "DisableFirefoxAccounts": true,
+    "DisableFirefoxStudies": true,
+    "DisableFormHistory": true,
+    "DisablePocket": true,
+    "DisableTelemetry": true,
+    "DisplayBookmarksToolbar": "never",
+    "DNSOverHTTPS": {
+      "Enabled": true,
+      "ProviderURL": "https://dns10.quad9.net/dns-query",
+      "Locked": true,
+      "Fallback": false
+    },
+    "Homepage": {
+      "URL": "about:blank",
+      "Locked": true,
+      "StartPage": "none"
+    },
+    "HttpsOnlyMode": "force_enabled",
+    "NewTabPage": false,
+    "NoDefaultBookmarks": true,
+    "OverrideFirstRunPage": "",
+    "OverrideUpgradePage": "",
+    "PasswordManagerEnabled": false,
+    "SanitizeOnShutdown": true,
+    "SearchEngines": {
+      "Default": "DuckDuckGo"
+    },
+    "SearchSugestEnabled": false
+  }
+}
