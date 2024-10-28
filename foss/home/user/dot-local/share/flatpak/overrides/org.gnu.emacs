@@ -16,7 +16,7 @@
 # </text>
 
 [Context]
-filesystems=!host;/home/user/Android/sdk:ro;/home/user/Documents/git-repos/achrinza/dotfiles/foss/dot-var/app/org.gnu.emacs/config/emacs:ro;/home/user/Documents/git-repos/achrinza/notes;
+filesystems=!host;/home/user/Android/sdk:ro;/home/user/Documents/git-repos/achrinza/dotfiles/foss/home/user/dot-var/app/org.gnu.emacs/config/emacs:ro;/home/user/Documents/git-repos/achrinza/notes;
 persistent=.gradle;.android;
 
 [Environment]

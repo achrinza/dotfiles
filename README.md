@@ -1,13 +1,15 @@
-# -*- coding: utf-8 -*-
-# SPDX-License-Identifier: FSFAP
+<!---
+  SPDX-License-Identifier: FSFAP
+  SPDX-FileCopyrightText: Copyright (c) 2024 Rifa Achrinza
+-->
 
-#+TITLE: Rifa's Config Files
+# Rifa's Config Files
 
-* Prerequisites
+## Prerequisites
 
 - GNU Stow
 
-* How to use
+## How to use
 
 Run these commands inside this root directory of this repository.
 
@@ -31,5 +33,5 @@ If conflicting regular (aka not symlinked) file is found in the target directory
 
 ## License
 
-[FSFAP](./LICENSES/FSFAP)
+[FSFAP](./LICENSES/FSFAP) AND [AGPL-3.0-only](./LICENSE/AGPL-3.0-only)
 
