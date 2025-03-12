@@ -16,3 +16,6 @@
 ;; </text>
 
 (setq package-enable-at-startup nil)
+
+;(when (featurep 'jsonrpc)
+;  (unload-feature 'jsonrpc))

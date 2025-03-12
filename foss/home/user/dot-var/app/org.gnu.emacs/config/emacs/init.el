@@ -15,6 +15,11 @@
 ;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ;; </text>
 
+; TODO:
+; https://emacs.stackexchange.com/a/80106
+; https://vxlabs.com/2022/06/12/typescript-development-with-emacs-tree-sitter-and-lsp-in-2022/
+; https://github.com/typescript-language-server/typescript-language-server/blob/master/docs/configuration.md
+
 (require 'use-package)
 
 ; Elpaca Installer
@@ -59,12 +64,19 @@
 ; END Elpaca Intalller
 
 ; Elpaca additional config
+;(setq package-install-upgrade-built-in t)
 (elpaca elpaca-use-package
   (elpaca-use-package-mode))
 (elpaca-wait)
 ; END Elpaca additional config
 
 ; Install dependencies
+(use-package
+  multiple-cursors
+  :ensure t)
+
+(global-set-key (kbd "C-c c e") 'mc/edit-lines)
+
 (use-package
   org-roam
   :ensure t
@@ -76,38 +88,96 @@
   :config (org-roam-setup))
 
 (use-package
-  company
+  org-roam-ui
   :ensure t
-  :hook ((js-json-mode . company-mode)
-	 (typescript-mode . company-mode)
-	 (yaml-mode . company-mode)
-	 (clojure-mode . company-mode)))
+  :after org-roam
+  :config
+  (setq org-roam-ui-sync-theme t
+        org-roam-ui-follow t
+        org-roam-ui-update-on-save t
+        org-roam-ui-open-on-start t))
+
+; (use-package
+;   company
+;   :ensure t
+;   :hook ((java-mode . company-mode)
+;          (js-json-mode . company-mode)
+; 	 (typescript-mode . company-mode)
+; 	 (yaml-mode . company-mode)
+; 	 (clojure-mode . company-mode)))
 
 ; `:demand t` required to initialise built-in Eglot
-(use-package
-  eglot
-  :demand t
-  :config (add-to-list 'eglot-server-programs
-		       '(clojure-mode "clojure-lsp")))
+(setq exec-path
+      (append exec-path
+              '(list "/home/user/.var/app/org.gnu.emacs/data/eclipse.jdt.ls/bin")))
 
+; Needed as the pre-installed version in Emacs 29.1 is too old.
+; Note that we fallback to `package.el` using `:ensure nil` as Elpaca cannot handle
+; upgrading built-in packages.
+;(use-package
+;  jsonrpc
+;  :ensure nil)
+(defun +elpaca-unload-jsonrpc (e)
+  (when (featurep 'jsonrpc)
+    (unload-feature 'jsonrpc))
+  (elpaca--continue-build e))
 (use-package
-  clojure-mode
-  :ensure t
-  :hook (clojure-mode . eglot-ensure))
+  jsonrpc
+  :ensure
+  `(jsonrpc
+    :build ,(append
+;             (butlast elpaca-build-steps)
+             (cl-set-difference
+	       (butlast elpaca-build-steps)
+	       '(elpaca--clone
+		 elpaca--configure-remotes
+		 elpaca--fetch
+		 elpaca--checkout-ref
+		 elpaca--queue-dependencies
+		 elpaca--activate-package))
+             (list '+elpaca-unload-jsonrpc 'elpaca--activate-package)))
+  :config
+  (setq ring-bell-function #'ignore))
 
 ;(use-package
-;  cider
+;  eglot
+;  :after jsonrpc
+;  :demand t
+;  :config (add-to-list 'eglot-server-programs
+;	               '(clojure-mode "clojure-lsp")))
+
+(use-package
+  dape
+  :ensure t
+  :config (dape-breakpoint-global-mode))
+
+;(use-package
+;  clojure-mode
 ;  :ensure t
-;  :hook (clojure-mode . cider-jack-in))
+;  :hook (clojure-mode . eglot-ensure))
+
+(use-package
+  corfu
+  :ensure t
+  :config
+  (global-corfu-mode)
+  :custom
+  (corfu-auto t))
+
+(use-package
+  cider
+  :ensure t
+  :hook (clojure-mode . cider-mode))
 
 (use-package
   js-json-mode
   :hook (js-json-mode . eglot-ensure))
 
-(use-package
-  typescript-mode
-  :ensure t
-  :hook (typescript-mode . eglot-ensure))
+;(use-package
+;  typescript-mode
+;  :ensure t
+;  :custom (setq auto-mode-alist (delete '("\\.tsx?\\'" . typescript-mode) auto-mode-alist))
+;  :hook (typescript-mode . eglot-ensure))
 
 (use-package
   yaml-mode
@@ -131,6 +201,11 @@
 
 ; END install dependencies
 
+(add-hook 'text-mode-hook
+          (lambda nil
+            (auto-fill-mode 1)
+            (set-fill-column 78)))
+
 (load-theme 'wombat t)
 
 ; (setq frame-background-mode "dark")
@@ -139,4 +214,46 @@
 ; Eglot config
 ; (add-to-list 'auto-mode-alist '("\\.ts[mx]?\\'" . typescript-mode))
 
+
+; Treesitter config;
+; Credits: https://www.ovistoica.com/blog/2024-7-05-modern-emacs-typescript-web-tsx-config
+(use-package treesit
+  :mode
+  (("\\.tsx\\'" . tsx-ts-mode)
+   ("\\.ts?\\'" . typescript-ts-mode))
+  :preface
+  (defun treesit-setup-grammars ()
+    "Install Tree-sitter grammars"
+    (interactive)
+    (dolist (grammar
+             '((tsx . ("https://github.com/tree-sitter/tree-sitter-typescript" "v0.23.2" "tsx/src"))
+               (typescript . ("https://github.com/tree-sitter/tree-sitter-typescript" "v0.23.2" "typescript/src"))))
+      (add-to-list 'treesit-language-source-alist grammar)
+      (unless (treesit-language-available-p (car grammar))
+        (treesit-install-language-grammar (car grammar)))))
+  :config
+;  (add-to-list 'auto-mode-alist '("\\.tsx\\'" . tsx-ts-mode))
+  (treesit-setup-grammars)
+  :hook
+  ((tsx-ts-mode . eglot-ensure)
+   (typescript-ts-mode . eglot-ensure)))
+
+(dolist (mapping
+  '((typescript-mode . typescript-ts-mode)))
+  (add-to-list 'major-mode-remap-alist mapping))
+
+(add-to-list 'auto-mode-alist '("\\.dita(map)?\\'" . nxml-mode))
+
 (setq-default indent-tabs-mode nil)
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages '(jsonrpc multiple-cursors)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
